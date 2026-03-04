@@ -1,13 +1,679 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Zenit Topografía</title>
+  <meta name="description" content="Zenit Topografía: levantamientos topográficos, control de obra, volumetrías y replanteo de obra." />
+
+  <style>
+    :root{
+      --zenit-orange:#FF7A00;
+      --text:#1f1f1f;
+      --muted:#5e5e5e;
+      --card:#ffffff;
+      --line:rgba(0,0,0,.08);
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius:16px;
+      --max:1100px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:#fff;
+      overflow-x:hidden;
+    }
+
+    /* Fondo curvas (suave) */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background: url("assets/img/curvas.jpg") center/cover no-repeat;
+      opacity:.16;
+      pointer-events:none;
+      z-index:-2;
+    }
+    /* capa blanca para mantener look limpio */
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      background: linear-gradient(to bottom, rgba(255,255,255,.92), rgba(255,255,255,.95));
+      pointer-events:none;
+      z-index:-1;
+    }
+
+    a{color:inherit}
+
+    /* Top bar */
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:saturate(1.2) blur(10px);
+      background:rgba(255,255,255,.78);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar .wrap{
+      max-width:var(--max);
+      margin:0 auto;
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:200px;
+    }
+    .brand img{
+      width:42px;
+      height:42px;
+      border-radius:10px;
+      object-fit:cover;
+      background:#fff;
+      border:1px solid var(--line);
+    }
+    .brand .name{
+      line-height:1.05;
+      font-weight:800;
+      letter-spacing:.4px;
+    }
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    nav{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    nav a{
+      text-decoration:none;
+      font-weight:650;
+      color:#2a2a2a;
+      font-size:14px;
+      opacity:.92;
+    }
+    nav a:hover{opacity:1}
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:12px 16px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#fff;
+      text-decoration:none;
+      font-weight:800;
+      letter-spacing:.2px;
+      cursor:pointer;
+      transition:transform .05s ease, box-shadow .2s ease, background .2s ease;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn-primary{
+      background:var(--zenit-orange);
+      border-color:rgba(0,0,0,.08);
+      color:#fff;
+      box-shadow:0 10px 22px rgba(255,122,0,.25);
+    }
+    .btn-primary:hover{filter:brightness(.98)}
+    .btn-ghost{
+      background:rgba(255,255,255,.8);
+    }
+
+    /* Sections */
+    .container{
+      max-width:var(--max);
+      margin:0 auto;
+      padding:0 16px;
+    }
+
+    .hero{
+      padding:54px 0 28px;
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:18px;
+      align-items:stretch;
+    }
+    .hero-card{
+      background:rgba(255,255,255,.85);
+      border:1px solid var(--line);
+      border-radius:calc(var(--radius) + 4px);
+      box-shadow:var(--shadow);
+      padding:26px;
+      overflow:hidden;
+      position:relative;
+    }
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      font-size:12px;
+      font-weight:900;
+      color:#2a2a2a;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:99px;background:var(--zenit-orange);
+      box-shadow:0 0 0 6px rgba(255,122,0,.16);
+    }
+    .hero h1{
+      margin:14px 0 8px;
+      font-size: clamp(30px, 4vw, 44px);
+      line-height:1.05;
+      letter-spacing:-.6px;
+    }
+    .hero .slogan{
+      margin:0 0 12px;
+      font-weight:800;
+      color:#2a2a2a;
+      font-size: clamp(14px, 1.8vw, 18px);
+    }
+    .hero .bullets{
+      margin:0;
+      padding:0;
+      list-style:none;
+      color:var(--muted);
+      font-weight:650;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px 14px;
+    }
+    .hero .bullets li{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .badge{
+      width:8px;height:8px;border-radius:99px;background:rgba(0,0,0,.18);
+    }
+    .hero-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    .hero-side{
+      display:grid;
+      gap:12px;
+    }
+    .mini{
+      background:rgba(255,255,255,.85);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+    .mini h3{
+      margin:0 0 8px;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+    .mini p{
+      margin:0;
+      color:var(--muted);
+      font-weight:600;
+      font-size:13px;
+      line-height:1.35;
+    }
+
+    .section{
+      padding:26px 0;
+    }
+    .section h2{
+      margin:0 0 12px;
+      font-size:22px;
+      letter-spacing:-.2px;
+    }
+    .section .lead{
+      margin:0 0 18px;
+      color:var(--muted);
+      font-weight:650;
+      max-width:70ch;
+      line-height:1.5;
+    }
+
+    .grid-4{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:14px;
+    }
+    .card{
+      background:rgba(255,255,255,.9);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .card .icon{
+      width:44px;height:44px;border-radius:14px;
+      background:rgba(255,122,0,.14);
+      display:grid;place-items:center;
+      border:1px solid rgba(255,122,0,.18);
+      margin-bottom:12px;
+    }
+    .card .icon svg{width:22px;height:22px;fill:var(--zenit-orange)}
+    .card h3{
+      margin:0 0 6px;
+      font-size:16px;
+      letter-spacing:.1px;
+    }
+    .card p{
+      margin:0;
+      color:var(--muted);
+      font-weight:600;
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    /* Gallery */
+    .gallery{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:12px;
+    }
+    .thumb{
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      background:#fff;
+      box-shadow:var(--shadow);
+      cursor:pointer;
+      position:relative;
+      transform:translateZ(0);
+    }
+    .thumb img{
+      width:100%;
+      height:220px;
+      object-fit:cover;
+      display:block;
+      transition:transform .25s ease;
+    }
+    .thumb:hover img{transform:scale(1.03)}
+    .thumb::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:linear-gradient(to top, rgba(0,0,0,.20), rgba(0,0,0,0));
+      opacity:.0;
+      transition:opacity .25s ease;
+      pointer-events:none;
+    }
+    .thumb:hover::after{opacity:.35}
+
+    /* Lightbox */
+    .lightbox{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.82);
+      z-index:1000;
+      padding:16px;
+    }
+    .lightbox.open{display:flex}
+    .lb-shell{
+      width:min(1100px, 100%);
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      gap:10px;
+    }
+    .lb-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      color:#fff;
+      font-weight:800;
+      gap:10px;
+    }
+    .lb-top .count{opacity:.9; font-size:13px; font-weight:800;}
+    .lb-btn{
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.22);
+      color:#fff;
+      border-radius:14px;
+      padding:10px 12px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .lb-btn:hover{background:rgba(255,255,255,.16)}
+    .lb-stage{
+      position:relative;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.35);
+      height:min(72vh, 620px);
+      display:grid;
+      place-items:center;
+    }
+    .lb-stage img{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      display:block;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+    .lb-nav{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .lb-nav .lb-btn{
+      flex:1;
+      padding:12px 14px;
+    }
+
+    /* Mission / Vision */
+    .mv{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px;
+    }
+
+    /* Banner bottom */
+    .banner{
+      margin-top:18px;
+      border-radius:22px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      background:#fff;
+    }
+    .banner img{
+      width:100%;
+      display:block;
+      object-fit:cover;
+    }
+
+    footer{
+      padding:28px 0 40px;
+      color:var(--muted);
+      font-weight:650;
+    }
+    .footer-grid{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      border-top:1px solid var(--line);
+      padding-top:18px;
+    }
+    .footer-grid .small{font-size:13px; line-height:1.45;}
+
+    /* Responsive */
+    @media (max-width: 900px){
+      .hero-grid{grid-template-columns:1fr}
+      nav{display:none}
+      .grid-4{grid-template-columns:repeat(2,1fr)}
+      .gallery{grid-template-columns:repeat(2,1fr)}
+      .thumb img{height:210px}
+    }
+    @media (max-width: 560px){
+      .grid-4{grid-template-columns:1fr}
+      .gallery{grid-template-columns:1fr}
+      .thumb img{height:220px}
+      .brand{min-width:unset}
+    }
+
+    /* WhatsApp floating button */
+    .wa-float{
+      position:fixed;
+      right:16px;
+      bottom:16px;
+      z-index:60;
+      border-radius:999px;
+      padding:12px 14px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.18);
+      border:1px solid rgba(0,0,0,.08);
+      background:var(--zenit-orange);
+      color:#fff;
+      text-decoration:none;
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .wa-float svg{width:18px;height:18px;fill:#fff}
+  </style>
 </head>
+
 <body>
-  <h1>Zenit Topografía</h1>
-  <p>Levantamientos topográficos y control de obra.</p>
-  <p>✅ Sitio en construcción</p>
-</body>
-</html>
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="wrap">
+      <div class="brand">
+        <img src="assets/img/logo.jpg" alt="Logo Zenit" />
+        <div>
+          <div class="name">ZENIT TOPOGRAFÍA</div>
+          <div class="sub">Servicios de topografía e ingeniería</div>
+        </div>
+      </div>
+
+      <nav aria-label="Menú principal">
+        <a href="#servicios">Servicios</a>
+        <a href="#trabajos">Trabajos</a>
+        <a href="#catalogo">Catálogo</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+
+      <a class="btn btn-primary" href="https://wa.me/525647168783?text=Hola%20Zenit%20Topograf%C3%ADa%2C%20me%20gustar%C3%ADa%20cotizar%20un%20servicio." target="_blank" rel="noopener">
+        Cotizar
+      </a>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-card">
+          <div class="kicker"><span class="dot"></span> Topografía para obra y proyectos</div>
+
+          <h1>Zenit Topografía</h1>
+          <p class="slogan">Perseverancia y precisión que impulsan tu proyecto.</p>
+
+          <ul class="bullets" aria-label="Servicios principales">
+            <li><span class="badge"></span>Levantamientos topográficos</li>
+            <li><span class="badge"></span>Control de obra</li>
+            <li><span class="badge"></span>Volumetrías</li>
+            <li><span class="badge"></span>Replanteo de obra</li>
+          </ul>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="https://wa.me/525647168783?text=Hola%20Zenit%20Topograf%C3%ADa%2C%20me%20gustar%C3%ADa%20cotizar%20un%20servicio." target="_blank" rel="noopener">
+              Cotizar por WhatsApp
+            </a>
+            <a class="btn btn-ghost" href="#catalogo">Ver catálogo</a>
+          </div>
+        </div>
+
+        <div class="hero-side">
+          <div class="mini">
+            <h3>Respuesta rápida</h3>
+            <p>Atención por WhatsApp para cotizaciones, disponibilidad y coordinación en campo.</p>
+          </div>
+          <div class="mini">
+            <h3>Entregables claros</h3>
+            <p>Información útil para obra: levantamientos, replanteos y volumetrías con enfoque práctico.</p>
+          </div>
+          <div class="mini">
+            <h3>Enfoque a resultados</h3>
+            <p>Trabajo responsable y eficiente para apoyar el avance del proyecto con confianza.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Servicios -->
+  <section id="servicios" class="section">
+    <div class="container">
+      <h2>Servicios</h2>
+      <p class="lead">Soluciones topográficas enfocadas en obra, precisión y tiempos de entrega. Nos adaptamos a los requerimientos de cada proyecto.</p>
+
+      <div class="grid-4">
+        <div class="card">
+          <div class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2l9 4-9 4-9-4 9-4zm0 9l9-4v11l-9 4-9-4V7l9 4zm0 2.2l-7-3.1v6.7l7 3.1 7-3.1v-6.7l-7 3.1z"/></svg>
+          </div>
+          <h3>Levantamientos topográficos</h3>
+          <p>Obtención precisa de información del terreno para proyectos de ingeniería y construcción.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 21V8l7-5 7 5v13h-2v-7H9v7H3zm14 0V10l4-2v13h-4z"/></svg>
+          </div>
+          <h3>Control de obra</h3>
+          <p>Apoyo topográfico para replanteos, niveles y seguimiento de avances en construcción.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm2 6h14v2H5V9zm-2 6h18v2H3v-2zm2 6h14v2H5v-2z"/></svg>
+          </div>
+          <h3>Volumetrías</h3>
+          <p>Cálculo de volúmenes para movimientos de tierra, terracerías y control de material.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 5-7 13-7 13S5 14 5 9a7 7 0 017-7zm0 9.5A2.5 2.5 0 1012 6a2.5 2.5 0 000 5.5z"/></svg>
+          </div>
+          <h3>Replanteo de obra</h3>
+          <p>Ubicación precisa de ejes, niveles y elementos del proyecto directamente en campo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trabajos -->
+  <section id="trabajos" class="section">
+    <div class="container">
+      <h2>Trabajos realizados</h2>
+      <p class="lead">Galería de referencia. Toca una imagen para verla en grande y desliza para navegar.</p>
+
+      <div class="gallery" id="gallery">
+        <!-- Thumbs -->
+        <div class="thumb" data-index="0"><img src="assets/img/Image04.jpg" alt="Trabajo 04"></div>
+        <div class="thumb" data-index="1"><img src="assets/img/Image06.jpg" alt="Trabajo 06"></div>
+        <div class="thumb" data-index="2"><img src="assets/img/Image07.jpg" alt="Trabajo 07"></div>
+        <div class="thumb" data-index="3"><img src="assets/img/Image09.jpg" alt="Trabajo 09"></div>
+        <div class="thumb" data-index="4"><img src="assets/img/Image10.jpg" alt="Trabajo 10"></div>
+        <div class="thumb" data-index="5"><img src="assets/img/Image12.jpg" alt="Trabajo 12"></div>
+        <div class="thumb" data-index="6"><img src="assets/img/Image13.jpg" alt="Trabajo 13"></div>
+        <div class="thumb" data-index="7"><img src="assets/img/Image16.jpg" alt="Trabajo 16"></div>
+        <div class="thumb" data-index="8"><img src="assets/img/Image18.jpg" alt="Trabajo 18"></div>
+        <div class="thumb" data-index="9"><img src="assets/img/Image20.jpg" alt="Trabajo 20"></div>
+        <div class="thumb" data-index="10"><img src="assets/img/Image22.jpg" alt="Trabajo 22"></div>
+        <div class="thumb" data-index="11"><img src="assets/img/Image23.jpg" alt="Trabajo 23"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Misión / Visión / Compromiso -->
+  <section class="section">
+    <div class="container">
+      <h2>Zenit</h2>
+      <p class="lead">Enfoque empresarial, técnica y compromiso para acompañar proyectos con resultados.</p>
+
+      <div class="mv">
+        <div class="card">
+          <h3>Misión</h3>
+          <p>En <strong>Zenit Topografía</strong> brindamos servicios de topografía e ingeniería orientados a satisfacer las necesidades de nuestros clientes, aportando información precisa y soluciones confiables para el desarrollo de sus proyectos. Nuestro compromiso es ofrecer un servicio basado en <strong>calidad, precisión y eficiencia</strong>, contribuyendo al éxito de cada obra en la que participamos.</p>
+        </div>
+
+        <div class="card">
+          <h3>Visión</h3>
+          <p>Ser una empresa reconocida y confiable en el sector de la topografía y la ingeniería, destacándonos por la calidad de nuestros servicios, la innovación en nuestras soluciones y el compromiso con el éxito de nuestros clientes. Buscamos consolidarnos como un <strong>aliado estratégico</strong> en el desarrollo de proyectos, aportando conocimiento técnico, experiencia y profesionalismo.</p>
+        </div>
+      </div>
+
+      <div style="height:14px"></div>
+
+      <div class="card">
+        <h3>Compromiso</h3>
+        <p>Creemos que el trabajo conjunto con nuestros clientes es la clave para lograr los mejores resultados. Nos enfocamos en comprender las necesidades específicas de cada proyecto para ofrecer soluciones técnicas adecuadas, confiables y eficientes. Desde nuestros inicios hemos trabajado constantemente en el desarrollo de nuestras capacidades, fortaleciendo nuestra experiencia y habilidades para brindar un servicio cada vez más completo y profesional.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Catálogo -->
+  <section id="catalogo" class="section">
+    <div class="container">
+      <h2>Catálogo</h2>
+      <p class="lead">Descarga nuestro catálogo de servicios en PDF.</p>
+
+      <a class="btn btn-primary" href="assets/img/zenit-topografia.pdf" target="_blank" rel="noopener">
+        Ver / Descargar catálogo (PDF)
+      </a>
+
+      <div style="height:18px"></div>
+
+      <div class="banner">
+        <img src="assets/img/banner.jpg" alt="Zenit Topografía - Banner">
+      </div>
+    </div>
+  </section>
+
+  <!-- Contacto -->
+  <section id="contacto" class="section">
+    <div class="container">
+      <h2>Contacto</h2>
+      <p class="lead">Listos para apoyar tu proyecto. Contáctanos y te respondemos por WhatsApp.</p>
+
+      <div class="grid-4" style="grid-template-columns:repeat(3,1fr)">
+        <div class="card">
+          <h3>WhatsApp</h3>
+          <p><a href="https://wa.me/525647168783" target="_blank" rel="noopener">+52 56 47 16 87 83</a></p>
+        </div>
+        <div class="card">
+          <h3>Teléfono</h3>
+          <p><a href="tel:+525647168783">+52 56 47 16 87 83</a></p>
+        </div>
+        <div class="card">
+          <h3>Correo</h3>
+          <p><a href="mailto:zt.zenit.topografia@gmail.com">zt.zenit.topografia@gmail.com</a></p>
+        </div>
+      </div>
+
+      <div style="height:16px"></div>
+
+      <a class="btn btn-primary" href="https://wa.me/525647168783?text=Hola%20Zenit%20Topograf%C3%ADa%2C%20me%20gustar%C3%ADa%20cotizar%20un%20servicio." target="_blank" rel="noopener">
+        Cotizar por WhatsApp
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="small">
+          <strong>Zenit Topografía</strong><br/>
+          Servicios de topografía profesional
