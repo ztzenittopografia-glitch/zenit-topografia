@@ -14,8 +14,8 @@
     :root {
       --zenit-orange: #FF7A00;
       --zenit-orange-glow: rgba(255, 122, 0, 0.5);
-      --bg-dark: #121215; /* Gris rata muy elegante */
-      --bg-panel: rgba(20, 20, 24, 0.85); /* Panel gris oscuro */
+      --bg-dark: #121215;
+      --bg-panel: rgba(20, 20, 24, 0.85);
       --text-main: #f0f0f0;
       --text-muted: #a0a0a0;
       --border-color: rgba(255, 255, 255, 0.08);
@@ -40,13 +40,12 @@
       letter-spacing: 1px;
     }
 
-    /* Background image with overlay */
     body::before {
       content: "";
       position: fixed;
       inset: 0;
       background: url("assets/img/bg-naranja.png") center/cover no-repeat;
-      opacity: 0.15; /* Un poco más brillante, como pedido */
+      opacity: 0.15;
       pointer-events: none;
       z-index: -1;
     }
@@ -54,7 +53,6 @@
       content: "";
       position: fixed;
       inset: 0;
-      /* Gradiente oscuro para suavizar los bordes */
       background: radial-gradient(circle at 50% 50%, rgba(18, 18, 21, 0.8) 0%, var(--bg-dark) 100%);
       pointer-events: none;
       z-index: -2;
@@ -107,6 +105,7 @@
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
+      display: none !important;
     }
 
     /* =========================================
@@ -273,7 +272,6 @@
       content: "";
       position: absolute;
       inset: 0;
-      /* Degradado negro exterior a interior (efecto viñeta) */
       box-shadow: inset 0 0 50px 30px rgba(0, 0, 0, 0.85);
       pointer-events: none;
       border-radius: 16px;
@@ -447,13 +445,13 @@
     }
 
     /* =========================================
-       LIGHTBOX (FIXED)
+       LIGHTBOX
        ========================================= */
     .lightbox {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.95);
       z-index: 10000;
-      display: none; /* Hidden by default */
+      display: none;
       flex-direction: column;
       padding: 20px;
       backdrop-filter: blur(10px);
@@ -519,7 +517,7 @@
       text-align: center;
       color: var(--text-muted);
     }
-    
+
     .wa-float {
       position: fixed; right: 20px; bottom: 20px;
       z-index: 60;
@@ -550,7 +548,7 @@
   <!-- Intro Loader -->
   <div id="intro-loader">
     <div class="loader-content">
-      <img src="assets/img/agua.png" alt="Logo Agua" style="max-width: 450px; margin-bottom: 20px;">
+      <img src="assets/img/agua.png" alt="Logo Agua" style="max-width: 450px; width: 100%; margin-bottom: 20px;">
       <div class="loader-subtitle">Precisión en tu obra</div>
     </div>
   </div>
@@ -644,7 +642,6 @@
       <p class="lead">Galería de referencia. Toca una imagen para verla en grande y desliza para navegar.</p>
 
       <div class="gallery" id="gallery-container">
-        <!-- Re-adding all original images -->
         <div class="thumb" data-index="0"><img src="assets/img/Image11.jpg" alt="Trabajo"></div>
         <div class="thumb" data-index="1"><img src="assets/img/Image02.jpg" alt="Trabajo"></div>
         <div class="thumb" data-index="2"><img src="assets/img/Image07.jpg" alt="Trabajo"></div>
@@ -677,7 +674,7 @@
           <p>Ser una empresa reconocida y confiable en el sector de la topografía y la ingeniería, destacándonos por la calidad de nuestros servicios, la innovación en nuestras soluciones y el compromiso con el éxito de nuestros clientes. Buscamos consolidarnos como un <strong>aliado estratégico</strong> en el desarrollo de proyectos, aportando conocimiento técnico, experiencia y profesionalismo.</p>
         </div>
       </div>
-      
+
       <div class="tech-panel" style="margin-top: 24px;">
         <h3>COMPROMISO</h3>
         <p>Creemos que el trabajo conjunto con nuestros clientes es la clave para lograr los mejores resultados. Nos enfocamos en comprender las necesidades específicas de cada proyecto para ofrecer soluciones técnicas adecuadas, confiables y eficientes. Desde nuestros inicios hemos trabajado constantemente en el desarrollo de nuestras capacidades, fortaleciendo nuestra experiencia y habilidades para brindar un servicio cada vez más completo y profesional.</p>
@@ -690,7 +687,7 @@
     <div class="container">
       <h2 class="section-title">Contacto</h2>
       <p class="lead">Listos para apoyar tu proyecto. Contáctanos y te respondemos por WhatsApp.</p>
-      
+
       <div class="grid-4" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
         <div class="tech-card" style="text-align: center;">
           <div class="icon" style="margin: 0 auto 15px;">
@@ -754,12 +751,12 @@
 
   <!-- Scripts -->
   <script>
-    // 1. Intro Loader Logic
-    window.addEventListener('load', () => {
+    // 1. Intro Loader Logic — usa DOMContentLoaded para no esperar imágenes
+    document.addEventListener('DOMContentLoaded', () => {
       const loader = document.getElementById('intro-loader');
       setTimeout(() => {
         loader.classList.add('hide-loader');
-      }, 2500); // Wait 2.5s before fading out
+      }, 3000);
     });
 
     // 2. Lightbox Logic
@@ -769,7 +766,7 @@
     const btnClose = document.getElementById('lb-close');
     const btnPrev = document.getElementById('lb-prev');
     const btnNext = document.getElementById('lb-next');
-    
+
     let currentIndex = 0;
     const images = Array.from(thumbs).map(t => t.querySelector('img').src);
 
@@ -802,8 +799,7 @@
     btnClose.addEventListener('click', closeLightbox);
     btnNext.addEventListener('click', showNext);
     btnPrev.addEventListener('click', showPrev);
-    
-    // Close on background click
+
     lightbox.addEventListener('click', (e) => {
       if(e.target === lightbox || e.target === document.querySelector('.lb-stage')) {
         closeLightbox();
@@ -812,4 +808,3 @@
   </script>
 </body>
 </html>
-
