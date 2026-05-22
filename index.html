@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
@@ -48,7 +48,7 @@
 
     /* DROPDOWN */
     .nav-dropdown{position:relative}
-    .dropdown-toggle{font-size:13px;font-weight:700;color:var(--zenit-orange);text-transform:uppercase;letter-spacing:1px;text-shadow:0 0 10px var(--zenit-orange-glow);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .3s;background:none;border:none;padding:0;font-family:'Space Grotesk',sans-serif}
+    .dropdown-toggle{font-size:15px;font-weight:700;color:var(--zenit-orange);text-transform:uppercase;letter-spacing:1px;text-shadow:0 0 10px var(--zenit-orange-glow);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .3s;background:none;border:none;padding:0;font-family:'Space Grotesk',sans-serif}
     .dropdown-toggle:hover{color:#ff9b3d;transform:translateY(-2px)}
     .arrow{font-size:10px;transition:transform .3s;display:inline-block}
     .nav-dropdown.open .arrow{transform:rotate(180deg)}
@@ -2506,15 +2506,17 @@ function calcularArea(){
   const coords = document.getElementById('zenit-cursor-coords');
   if(!cur || window.matchMedia('(pointer:coarse)').matches) return;
 
-  let mx=window.innerWidth/2, my=window.innerHeight/2;
+  let mx=-200, my=-200;
   let cx=mx, cy=my;
   let rawX=mx, rawY=my;
+  let moved = false;
 
   function loop(){
     cx += (mx-cx)*0.385;
     cy += (my-cy)*0.385;
     cur.style.left = cx+'px';
     cur.style.top  = cy+'px';
+    cur.style.opacity = moved ? '1' : '0';
 
     // Etiqueta de coords: offset para que no tape el cursor
     const offX = rawX > window.innerWidth  - 120 ? -110 : 18;
@@ -2527,6 +2529,7 @@ function calcularArea(){
   loop();
 
   document.addEventListener('mousemove', e=>{
+    moved = true;
     mx = e.clientX; my = e.clientY;
     rawX = e.clientX; rawY = e.clientY;
     coords.textContent = `X: ${e.clientX} px  |  Y: ${e.clientY} px`;
