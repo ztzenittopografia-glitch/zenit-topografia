@@ -1567,6 +1567,13 @@ footer img {
 }
 
 @media (max-width: 768px) {
+  #intro-video {
+    transform: scale(0.7);
+    transform-origin: center center;
+  }
+  .intro-video-overlay-text {
+    top: 40%;
+  }
   .topbar .wrap { padding: 10px 16px; }
   .brand img { width: 140px; }
   .brand-name { font-size: 1rem; }
